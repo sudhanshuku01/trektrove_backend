@@ -2,13 +2,17 @@ import express from "express";
 import fs from "fs";
 import formidable from "express-formidable";
 import dotenv from "dotenv";
-import path from "path"; 
+import path from "path";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../Models/userModel.js";
 import { hashPassword, comparePassword } from "../Helper/authHelper.js";
 import sendMail from "../utils/Nodemailer.js";
-import { requireSignIn } from "../Middleware/Middleware.js";
+
+import {
+  generateRandomUsername,
+  generateRandomLastName,
+} from "../Helper/guestaccountHelper.js";
 const __dirname = path.resolve();
 dotenv.config();
 const Router = express.Router();
@@ -55,7 +59,7 @@ Router.post("/signup", formidable(), async (req, res) => {
           message: "ProfilePicture is required",
         });
       case profilePicture && profilePicture > 5000000:
-        return res.status(500).json({
+        return res.status(400).json({
           success: false,
           message: "Picture is Required and should be less then 5 MB",
         });
@@ -327,8 +331,118 @@ Router.post("/update-password", async (req, res) => {
     console.log(error);
     res.status(400).json({
       success: false,
-      message: "something went wrong",
+      message: "Internal server error",
     });
   }
 });
+
+Router.post("/guest-account", formidable(), async (req, res) => {
+  const profilePicture = req.files.profilePicture;
+  if (!profilePicture) {
+    return res.status(401).json({
+      success: false,
+      message: "please provide the profile picture",
+    });
+  }
+  if (profilePicture && profilePicture > 5000000) {
+    return res.status(400).json({
+      success: false,
+      message: "Picture is Required and should be less then 5 MB",
+    });
+  }
+  try {
+    const username = generateRandomUsername(10);
+    const firstName = username;
+    const lastName = generateRandomLastName();
+    const email = username + "@gmail.com";
+    const hashedPassword = await hashPassword("@#trek!09trove");
+
+    const existingUser = await User.findOne({
+      $or: [{ email: email }, { username: username }],
+    });
+
+    if (existingUser) {
+      return res.status(401).json({
+        message: "user already exits",
+      });
+    }
+    const user = new User({
+      username: username,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      password: hashedPassword,
+      isVerified: true,
+      role: 2,
+      confirmPassword:undefined,
+      verficationToken:undefined
+    });
+
+    if (profilePicture) {
+      user.profilePicture.data = fs.readFileSync(profilePicture.path);
+      user.profilePicture.contentType = profilePicture.type;
+    }
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
+
+    const userdetails = {
+      _id: user._id,
+      userName: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Guest Account Login successful",
+      user: userdetails,
+      token: token,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+Router.post('/delete-guest-user',async (req,res)=>{
+  const {email}=req.body;
+  if(!email){
+    return res.status(401).json({
+      success:false,
+      message:'please provide email'
+    })
+  }
+  try{
+  const finduser=await User.findOne({email});
+  if(!finduser){
+    return res.status(400).json({
+      success:false,
+      message:'user not found'
+    })
+  }
+  if(finduser.role !== 2){
+    return res.status(400).json({
+     success:false,
+     message:'action not allowed'
+    })
+  }
+  const deleteUser=await User.findOneAndDelete({email});
+   res.status(200).json({
+    success:true,
+    message:'guest user deleted successfully'
+  })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success:false,
+      message:'internal server error'
+    })
+  }
+})
 export default Router;
