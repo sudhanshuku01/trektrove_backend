@@ -2,14 +2,15 @@ import express from 'express';
 import { dbConnection } from './utils/db.js';
 import bodyParser from 'body-parser'; 
 import cors from 'cors'
-import dotevn from 'dotenv'
+import * as dotenv from 'dotenv'
 import authRoute from './Routes/AuthRoute.js';
 import commentRoute from './Routes/CommentRoute.js'
 import LikedRoute from './Routes/LikedRoute.js';
  
 const app=express();
 app.use(cors());
-dotevn.config();
+
+dotenv.config();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()); 

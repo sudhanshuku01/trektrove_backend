@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import formidable from "express-formidable";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import path from "path";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -9,12 +9,15 @@ import User from "../Models/userModel.js";
 import { hashPassword, comparePassword } from "../Helper/authHelper.js";
 import sendMail from "../utils/Nodemailer.js";
 
+dotenv.config();
+
 import {
   generateRandomUsername,
   generateRandomLastName,
 } from "../Helper/guestaccountHelper.js";
+
 const __dirname = path.resolve();
-dotenv.config();
+
 const Router = express.Router();
 
 Router.post("/signup", formidable(), async (req, res) => {

@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 const sendMail = async function sendMail(email,verficationToken) {

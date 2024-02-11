@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import dotevn from 'dotenv'
+import * as dotevn from 'dotenv'
 dotevn.config();
 
 export async function dbConnection(){

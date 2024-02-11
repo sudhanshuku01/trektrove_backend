@@ -1,5 +1,5 @@
 import express from 'express';
-import dotenv from 'dotenv';
+import* as dotenv from 'dotenv';
 import User from '../Models/userModel.js';
 import Comment from '../Models/commentModel.js';
 import {requireSignIn} from '../Middleware/Middleware.js';
