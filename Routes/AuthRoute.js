@@ -182,6 +182,7 @@ Router.post("/login", async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      GuestAccount:false
     };
     res.status(200).json({
       success: true,
@@ -396,6 +397,7 @@ Router.post("/guest-account", formidable(), async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      GuestAccount:true
     };
 
     res.status(200).json({
@@ -435,7 +437,7 @@ Router.post('/delete-guest-user',async (req,res)=>{
      message:'action not allowed'
     })
   }
-  const deleteUser=await User.findOneAndDelete({email});
+  const deletedUser=await User.findOneAndDelete({email});
    res.status(200).json({
     success:true,
     message:'guest user deleted successfully'
