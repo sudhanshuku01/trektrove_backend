@@ -1,17 +1,16 @@
 import nodemailer from 'nodemailer';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const sendMail = async function sendMail(email,verficationToken) {
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.USER,
-      pass: process.env.PASS,
-    },
-  });
+ const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "hk5738058@gmail.com",
+    pass: "cqvzhkrtpzirayxq",
+  },
+});
 
   const verifyUrl = `https://backend-t-u090.onrender.com/auth/verify-email?email=${encodeURIComponent(email)}&verficationToken=${verficationToken}`;
 
